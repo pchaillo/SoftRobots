@@ -4,6 +4,16 @@ import Sofa
 from softrobots.actuators import pneumatic as pb
 from softrobots.inverse.effectors import effectorGoal as eG
 
+def EffectorGoal(node, position,name,taille,solver=True): # => Factoriser avec EffectorGoal_Orientation ?
+    goal = node.addChild(name)
+    goal.addObject('MechanicalObject', name=name + 'M0', position=position)
+    goal.addObject('SphereCollisionModel', radius=taille)
+    if solver :
+        goal.addObject('EulerImplicitSolver', firstOrder=True)
+        goal.addObject('CGLinearSolver', iterations=100, threshold=1e-12, tolerance=1e-10) # ne sert à rien ?
+        goal.addObject('UncoupledConstraintCorrection')
+    # goal.addObject('RestShapeSpringsForceField', points=0, angularStiffness=1e5, stiffness=1e5)
+    return goal
 
 def PneumaticCavity(surfaceMeshFileName=None,
                     attachedTo=None,
@@ -33,7 +43,8 @@ def PneumaticCavity(surfaceMeshFileName=None,
 
         minVolumeGrowth:
 
-        maxVolumeGrowth:
+        maxVolumeGrowth:This scene is using the SoftRobots.Inverse plugin which does not seem available on your system.
+
 
         maxVolumeGrowthVariation:
 
@@ -49,7 +60,7 @@ def PneumaticCavity(surfaceMeshFileName=None,
 
     """
     pneumatic = pb.PneumaticBase(surfaceMeshFileName=surfaceMeshFileName,
-                    attachedTo=attachedTo,
+                    attachedAsAChildOf=attachedTo,
                     name=name,
                     rotation=rotation,
                     translation=translation,
@@ -75,7 +86,9 @@ def PneumaticCavity(surfaceMeshFileName=None,
 
 def createScene(node):
     from stlib3.scene import MainHeader
-
+    
+    node.addObject('RequiredPlugin', name='SoftRobots.Inverse') # Where is SofaValidation ? => Deprecated Error in terminal
+    node.addObject('RequiredPlugin', name='SoftRobots')
     node.addObject('RequiredPlugin', name='Sofa.Component.IO.Mesh') # Needed to use components [MeshOBJLoader]  
     node.addObject('RequiredPlugin', name='Sofa.Component.Mapping.Linear') # Needed to use components [BarycentricMapping]  
     node.addObject('RequiredPlugin', name='Sofa.Component.StateContainer') # Needed to use components [MechanicalObject]  
@@ -101,12 +114,13 @@ def createScene(node):
     pneumatic.addObject('RestShapeSpringsForceField', points=[0,1,2,3], angularStiffness=1e5, stiffness=1e5) # pour accrocher la base du robot dans l'espace
     pneumatic.addObject('UniformMass', totalMass=1000, rayleighMass = 0)
 
-    goal = eG.EffectorGoal(attachedTo=node, position = [0,0,0],name = 'goal')
-    goal.addObject('SphereCollisionModel', radius=2) # for visualisation
+    goal = EffectorGoal(node=node, position = [0,0,1],taille = 1,name = 'goal')
+    # goal = eG.EffectorGoal(attachedTo=pneumatic, position = [0,0,0],name = 'goal')
+    # goal.addObject('SphereCollisionModel', radius=0.1) # for visualisation
     controlledPoints = pneumatic.addChild('controlledPoints')
-    controlledPoints.addObject('MechanicalObject', name="actuatedPoints", template="Vec3",position=[0, 0, 0])#,rotation=[0, 90 ,0]) # classic
+    controlledPoints.addObject('MechanicalObject', name="actuatedPoints", template="Vec3",position=[0, 0, 1])#,rotation=[0, 90 ,0]) # classic
     # controlledPoints.addObject('MechanicalObject', name="actuatedPoints", template="Rigid3",position=[0, 0, h_effector,0., 0., 0., 1.])#,rotation=[0, 90 ,0]) # rigid pour l'orientation
-    controlledPoints.addObject('PositionEffector', template="Vec3d", indices='0', effectorGoal="@../../../goal/goalM0.position") # classic
+    controlledPoints.addObject('PositionEffector', template="Vec3d", indices='0', effectorGoal="@../../goal/goalM0.position") # classic
     controlledPoints.addObject('BarycentricMapping', mapForces=False, mapMasses=False)
 
     # node.addObject(PressureController(pas=10,parent = pneumatic))
