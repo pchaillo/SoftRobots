@@ -74,7 +74,9 @@ def CompleteEffectorGoal(attachedTo=None,
     print_flag = True,
     indices = None,
     index = None,
-    Collision_Model = True):
+    Collision_Model = True,
+    pos_weight = 1,
+    orientation_weight = 1):
 
     """Adds an effector goal and the associated controlled point of the body
 
@@ -133,11 +135,10 @@ def CompleteEffectorGoal(attachedTo=None,
 
     if print_flag :
         print("Effector path :"+ effector_goal_path)
-    # effector_goal_path = "@../../../goal/goalM0.position"
 
     if orientationCONTROL : # création de deux noeuds distincts pour le contrôle en position et en orientation
-        controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position, useDirections = [1, 1, 1, 0, 0, 0], weight = 1,indices=indices, index = index ) 
-        controlledPoints_orientation = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position,useDirections = [0, 0, 0, 1, 1, 1], weight = 10,indices=indices, index = index) 
+        controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position, useDirections = [1, 1, 1, 0, 0, 0], weight = pos_weight,indices=indices, index = index ) 
+        controlledPoints_orientation = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position,useDirections = [0, 0, 0, 1, 1, 1], weight = orientation_weight,indices=indices, index = index) 
     else :
         controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position)  # "@../../goal/goal.position"
 

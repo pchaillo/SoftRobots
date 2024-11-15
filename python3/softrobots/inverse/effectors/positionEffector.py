@@ -69,7 +69,7 @@ def PositionEffector(attachedTo=None,
     # between the effector's DoFs and the parents's ones so that movements of the effector's DoFs will be mapped
     # to the model and vice-versa;
     if template == "Rigid3d" or template == "Rigid3f":
-        if index != None :
+        if index != None : # TODO : need to be cleaned
             effector.addObject('RigidMapping', name="Mapping", mapForces=True, mapMasses=True, index = index)
         else :
             effector.addObject('RigidMapping', name="Mapping", mapForces=False, mapMasses=False)
