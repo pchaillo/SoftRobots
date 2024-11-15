@@ -7,7 +7,10 @@ def PositionEffector(attachedTo=None,
                     useDirections=None,
                     translation=[0.0,0.0,0.0],
                     rotation=[0.0,0.0,0.0],
-                    uniformScale=1.0):
+                    uniformScale=1.0,
+                    weight = 1,
+                    indices = None,
+                    index = None):
 
     """Adds a position effector. Should be used in the context of the resolution of an inverse problem: find the actuation that leads to a desired position of the effector.
     See documentation at: https://project.inria.fr/softrobot/documentation/constraint/position-effector/
@@ -52,9 +55,12 @@ def PositionEffector(attachedTo=None,
 
     # Add a PositionEffector object with a name.
     # the indices are referring to the MechanicalObject's positions.
+    if indices == None :
+        indices = range(len(position))
     positionEffector = effector.addObject('PositionEffector', template=template,
-                                            indices=range(len(position)),
-                                            effectorGoal=effectorGoal
+                                            indices=indices,
+                                            effectorGoal=effectorGoal,
+                                            weight=weight
                                             )
     if directions != None : positionEffector.directions = directions
     if useDirections != None : positionEffector.useDirections = useDirections
@@ -63,7 +69,10 @@ def PositionEffector(attachedTo=None,
     # between the effector's DoFs and the parents's ones so that movements of the effector's DoFs will be mapped
     # to the model and vice-versa;
     if template == "Rigid3d" or template == "Rigid3f":
-        effector.addObject('RigidMapping', name="Mapping", mapForces=False, mapMasses=False)
+        if index != None :
+            effector.addObject('RigidMapping', name="Mapping", mapForces=True, mapMasses=True, index = index)
+        else :
+            effector.addObject('RigidMapping', name="Mapping", mapForces=False, mapMasses=False)
     else:
         effector.addObject('BarycentricMapping', name="Mapping", mapForces=False, mapMasses=False)
 

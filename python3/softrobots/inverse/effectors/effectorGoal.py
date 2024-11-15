@@ -8,7 +8,8 @@ def EffectorGoal(attachedTo=None,
     rotation=[0.0,0.0,0.0],
     uniformScale=1.0,
     visuScale=0.1,
-    ):
+    SOLVER = True,
+    mechanical_object_name = None):
 
     """Adds a effector goal. Should be used in the context of the resolution of an inverse problem: find the actuation that leads to the given desired position.
     See examples in SoftRobots/docs/tutorials
@@ -41,12 +42,16 @@ def EffectorGoal(attachedTo=None,
     #  This add a new node in the scene. This node should be appended to the root node.
     goal = attachedTo.addChild(name)
 
+    if mechanical_object_name == None :
+        mechanical_object_name = name
+
     # This add a MechanicalObject, a component holding the degree of freedom of our
     # mechanical modelling. In the case of a effector it is a set of positions specifying
     # ghe location of the effector
-    goal.addObject('EulerImplicitSolver', firstOrder=True)
-    goal.addObject('CGLinearSolver', threshold=1e-5, tolerance=1e-5)
-    goal.addObject('MechanicalObject',name=name, template=template, position=position,
+    if SOLVER :
+        goal.addObject('EulerImplicitSolver', firstOrder=True)
+        goal.addObject('CGLinearSolver', threshold=1e-5, tolerance=1e-5)
+    goal.addObject('MechanicalObject',name=mechanical_object_name, template=template, position=position,
                         rotation=rotation, translation=translation, scale=uniformScale,
                         showObject="1", showObjectScale=visuScale, drawMode="1", showColor="255 255 255 255")
 
@@ -61,8 +66,15 @@ def CompleteEffectorGoal(attachedTo=None,
     goal_rotation=[0.0,0.0,0.0],
     uniformScale=1.0,
     visuScale=0.1,
-    associated_position=None
-    ):
+    associated_position=None,
+    addSOLVER = True,
+    orientationCONTROL = False,
+    mechanical_object_name = None,
+    node_layer = 2,
+    print_flag = True,
+    indices = None,
+    index = None,
+    Collision_Model = True):
 
     """Adds an effector goal and the associated controlled point of the body
 
@@ -91,6 +103,15 @@ def CompleteEffectorGoal(attachedTo=None,
             }
 
     """
+    if mechanical_object_name == None :
+        mechanical_object_name = name
+
+    if associated_position == None : associated_position = goal_position
+
+    if orientationCONTROL == True and template == "Vec3":
+        print("Attention, to control the orientation of the effector, it require to use the Rigid3 template, will be replaced in the following" )
+        template = "Rigid3"
+
     goal = EffectorGoal(attachedTo=attachedTo,
     name=name,
     position=goal_position,
@@ -98,16 +119,26 @@ def CompleteEffectorGoal(attachedTo=None,
     translation=goal_translation,
     rotation=goal_rotation,
     uniformScale=uniformScale,
-    visuScale=visuScale)
+    visuScale=visuScale,
+    SOLVER=addSOLVER,
+    mechanical_object_name=mechanical_object_name)
 
-    goal.addObject('UncoupledConstraintCorrection')
-    goal.addObject('SphereCollisionModel', radius=1) # for visualisation
+    if addSOLVER :
+        goal.addObject('UncoupledConstraintCorrection')
 
-    controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = "Vec3", effectorGoal = "@../../goal/goal.position", position = associated_position)
+    if Collision_Model :
+        goal.addObject('SphereCollisionModel', radius=1) # for visualisation
 
-    # controlledPoints = bodyNode.addChild('controlledPoints')
-    # controlledPoints.addObject('MechanicalObject', name="actuatedPoints", template="Vec3",position=associated_position) 
-    # controlledPoints.addObject('PositionEffector', template="Vec3d", indices='0', effectorGoal="@../../goal/goal.position") # Lien entre les deux dépend de la position des noeuds = pas parfait à reprendre
-    # controlledPoints.addObject('BarycentricMapping', mapForces=False, mapMasses=False)
+    effector_goal_path = '@' + node_layer * '../' + name+ '/' + mechanical_object_name + '.position'
+
+    if print_flag :
+        print("Effector path :"+ effector_goal_path)
+    # effector_goal_path = "@../../../goal/goalM0.position"
+
+    if orientationCONTROL : # création de deux noeuds distincts pour le contrôle en position et en orientation
+        controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position, useDirections = [1, 1, 1, 0, 0, 0], weight = 1,indices=indices, index = index ) 
+        controlledPoints_orientation = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position,useDirections = [0, 0, 0, 1, 1, 1], weight = 10,indices=indices, index = index) 
+    else :
+        controlledPoints = pE.PositionEffector(attachedTo = bodyNode, template = template, effectorGoal = effector_goal_path, position = associated_position)  # "@../../goal/goal.position"
 
     return goal
