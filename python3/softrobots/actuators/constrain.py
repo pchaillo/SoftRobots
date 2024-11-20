@@ -1,3 +1,7 @@
+"""
+Contain function to add constrain fiber modeling to pneumatic actuator
+"""
+
 import array
 import numpy as np
 from splib3.topology import remeshing as rf
@@ -67,7 +71,7 @@ def trier_points_horaire_avec_indices(points, indices, axis = 2, centre=None):
     
     return points_triés, indices_tries
 
-def AddConstrainCircles(parent,circle_tab,circle_ind_tab,conv_tab,axis,stiffness = 10000,print_flag=False): # A mettre dans SoftRobot ? # Ajouter la raideur du ressort en paramètre ?
+def AddConstrainCircles(parent,circle_tab,circle_ind_tab,conv_tab,axis,stiffness = 10000,print_flag=False,name = "ConstrainSpring"): # A mettre dans SoftRobot ? # Ajouter la raideur du ressort en paramètre ?
     """
     Fonction qui ajoute les ressorts autour des cavités pour éviter les déformations latérales
     """
@@ -91,7 +95,7 @@ def AddConstrainCircles(parent,circle_tab,circle_ind_tab,conv_tab,axis,stiffness
                 p1 = new_circle_pt[ind_0]
                 p2 = new_circle_pt[ind_1]
                 d = [dist(p1,p2)] # on suppose ici que tous les points d'un cercle de la cavité sont espacés de la même distance => refaire un code qui place les ressorts 1 à 1 pour être utilisable pour toutes les géométries ?
-                NoeudCercle = parent.addChild("Ressort" + str(ind_cercle) + "_" +  str(u))
+                NoeudCercle = parent.addChild(name + str(ind_cercle) + "_" +  str(u))
                 # new_ind_tab_2 = rf.shift_tab(tab= new_ind_tab) # tableau des indices décalés d'un point, pour relier chaque point du cercle au point suivant
                 NoeudCercle.addObject("MeshSpringForceField", name="Springs" ,stiffness= stiffness,indices1 =new_ind_tab[ind_0], indices2 = new_ind_tab[ind_1] ,length = d)# damping="4"
 
@@ -111,7 +115,7 @@ def ConstrainFromCavity(cavity_node,indices=None,axis = 0,tolerance = 0,spring_s
 
     # return [new_points, triangles,conv_tab]
 
-def ConstrainCavity(points,parent,indices=None,axis = 0,tolerance = 0,spring_stiffness=10000,print_flag=False): # A mettre dans SPLIB ?
+def ConstrainCavity(points,parent,indices=None,axis = 0,tolerance = 0,spring_stiffness=10000,print_flag=False,name = "ConstrainSpring"): # A mettre dans SPLIB ?
     """
     parent = noeud SOFA sur lequel on va mettre les resorts 
     axis = axe selon lequel on va placer les cercles de ressorts successifs
@@ -123,6 +127,6 @@ def ConstrainCavity(points,parent,indices=None,axis = 0,tolerance = 0,spring_sti
     """
     [circles, ind_tab] = rf.circle_detection_axis(points = points, axis = axis, tolerance = tolerance,indices = indices) # circles position good # detecte les positions des cercles le long des cavités
     conv_tab = conv_tab_from_ind_tab(rf.default_indices(len(points)))
-    AddConstrainCircles(parent=parent,circle_tab = circles,circle_ind_tab=ind_tab,conv_tab = conv_tab,axis = axis,stiffness=spring_stiffness,print_flag=print_flag) # Pour créer les ressorts qui constraigenent les déformations latérales 
+    AddConstrainCircles(parent=parent,circle_tab = circles,circle_ind_tab=ind_tab,conv_tab = conv_tab,axis = axis,stiffness=spring_stiffness,print_flag=print_flag,name=name) # Pour créer les ressorts qui constraigenent les déformations latérales 
 
     # return [new_points, triangles,conv_tab]

@@ -110,11 +110,14 @@ def PneumaticBase(surfaceMeshFileName=None,
                                         name=name)
 
     if surfaceMeshFileName is None:
-        if points is None :
-            Sofa.msg_error("No surfaceMeshFileName and no points specified, please specify one")
+        if triangles is None :
+            Sofa.msg_error("No surfaceMeshFileName and no triangles specified, please specify one")
             return None
         else :
-            pneumatic.addObject("TriangleSetTopologyContainer", triangles = triangles,name="MeshLoader",points = points)#, position =Boite_III_K.pointsInROI.value, points = Boite_III_K.indices.value, quad = Boite_III_K.quadIndices.value )
+            if points is None :
+                pneumatic.addObject("TriangleSetTopologyContainer", triangles = triangles,name="MeshLoader")#, position =Boite_III_K.pointsInROI.value, points = Boite_III_K.indices.value, quad = Boite_III_K.quadIndices.value )
+            else:
+                pneumatic.addObject("TriangleSetTopologyContainer", triangles = triangles,name="MeshLoader",points = points)#, position =Boite_III_K.pointsInROI.value, points = Boite_III_K.indices.value, quad = Boite_III_K.quadIndices.value )
 
     else :
 
@@ -130,15 +133,19 @@ def PneumaticBase(surfaceMeshFileName=None,
                 "Your surfaceMeshFileName extension is not the right one, you have to give a surfacic mesh with .stl or .obj extension")
             return None
 
-    # This adds a MeshTopology, a component holding the topology of the cavity.
-    # pneumatic.addObject('MeshTopology', name="topology", filename=surfaceMeshFileName)
-    pneumatic.addObject('MeshTopology', name='topology', src='@MeshLoader')
+    if mechanical_object_name != None :
+        # This adds a MeshTopology, a component holding the topology of the cavity.
+        # pneumatic.addObject('MeshTopology', name="topology", filename=surfaceMeshFileName)
 
-    # This adds a MechanicalObject, a component holding the degree of freedom of our
-    # mechanical modelling. In the case of a cavity actuated with pneumatic, it is a set of positions specifying
-    # the points where the pressure is applied.
-    pneumatic.addObject('MechanicalObject', src="@topology",name = mechanical_object_name)
-    # pneumatic.addObject('MechanicalObject',name = mechanical_object_name)
+        pneumatic.addObject('MeshTopology', name='topology', src='@MeshLoader') ##
+
+        # This adds a MechanicalObject, a component holding the degree of freedom of our
+        # mechanical modelling. In the case of a cavity actuated with pneumatic, it is a set of positions specifying
+        # the points where the pressure is applied.
+
+        pneumatic.addObject('MechanicalObject', src="@topology",name = mechanical_object_name) ##
+
+        # pneumatic.addObject('MechanicalObject',name = mechanical_object_name)
 
 
     # This adds a BarycentricMapping. A BarycentricMapping is a key element as it will add a bi-directional link
