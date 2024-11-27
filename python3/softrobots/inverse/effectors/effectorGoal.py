@@ -57,8 +57,8 @@ def EffectorGoal(attachedTo=None,
 
     return goal
 
-def CompleteEffectorGoal(attachedTo=None,
-    bodyNode = None,
+def CompleteEffectorGoal(attachedTo=None, # node of the effector goal
+    bodyNode = None, # node where the effector goal will be connected to
     name="Goal",
     goal_position=None,
     template="Vec3",
@@ -111,7 +111,7 @@ def CompleteEffectorGoal(attachedTo=None,
     if associated_position == None : associated_position = goal_position
 
     if orientationCONTROL == True and template == "Vec3":
-        print("Attention, to control the orientation of the effector, it require to use the Rigid3 template, will be replaced in the following" )
+        Sofa.msg_warning(attachedTo, "Attention, to control the orientation of the effector, it require to use the Rigid3 template, will be replaced in the following" )
         template = "Rigid3"
 
     goal = EffectorGoal(attachedTo=attachedTo,

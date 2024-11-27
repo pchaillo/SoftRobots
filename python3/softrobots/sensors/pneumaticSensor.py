@@ -62,7 +62,7 @@ def PneumaticSensor(surfaceMeshFileName=None,
                                            name=name)
 
     # This add a MeshSTLLoader, a component loading the topology of the cavity.
-    if surfaceMeshFileName.endswith(".stl"):
+    if surfaceMeshFileName.endswith(".stl"): # This load could be factorised (identic to the one used for pneumatic actuators for exemple)
         PneumaticSensor.addObject('MeshSTLLoader', name='MeshLoader', filename=surfaceMeshFileName, rotation=rotation, translation=translation, scale=uniformScale)
     elif surfaceMeshFileName.endswith(".obj"):
         PneumaticSensor.addObject('MeshOBJLoader', name='MeshLoader', filename=surfaceMeshFileName, rotation=rotation, translation=translation, scale=uniformScale)

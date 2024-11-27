@@ -57,11 +57,11 @@ def PositionEffector(attachedTo=None,
     # the indices are referring to the MechanicalObject's positions.
     if indices == None :
         indices = range(len(position))
+        
     positionEffector = effector.addObject('PositionEffector', template=template,
                                             indices=indices,
                                             effectorGoal=effectorGoal,
-                                            weight=weight
-                                            )
+                                            weight=weight)
     if directions != None : positionEffector.directions = directions
     if useDirections != None : positionEffector.useDirections = useDirections
 

@@ -71,7 +71,9 @@ def PneumaticBase(surfaceMeshFileName=None,
                     valueType="volumeGrowth",
                     points = None,
                     triangles = None,
-                    mechanical_object_name = "MechanicalObject" ) :
+                    mechanical_object_name = "MechanicalObject" ,
+                    minPressure = None,
+                    maxPressure = None) :
     """Adds a pneumatic constraint.
 
     The constraint apply to a parent mesh.
@@ -147,6 +149,8 @@ def PneumaticBase(surfaceMeshFileName=None,
 
         # pneumatic.addObject('MechanicalObject',name = mechanical_object_name)
 
+    if minPressure != None : pneumatic.minPressure = minPressure
+    if maxPressure != None : pneumatic.maxPressure = maxPressure
 
     # This adds a BarycentricMapping. A BarycentricMapping is a key element as it will add a bi-directional link
     # between the cavity's DoFs and the parents' ones so that the pressure applied on the cavity wall will be mapped
@@ -165,7 +169,10 @@ def PneumaticCavity(surfaceMeshFileName=None,
                     valueType="volumeGrowth",
                     points = None,
                     triangles = None,
-                    mechanical_object_name = "MechanicalObject"):
+                    mechanical_object_name = "MechanicalObject",
+                    minPressure = None,
+                    maxPressure = None,
+                    SPC_node_name = 'SurfacePressureConstraint'):
     """Adds a pneumatic constraint.
 
     The constraint apply to a parent mesh.
@@ -203,13 +210,16 @@ def PneumaticCavity(surfaceMeshFileName=None,
                     valueType=valueType,
                     points = points,
                     triangles = triangles,
-                    mechanical_object_name = mechanical_object_name)
+                    mechanical_object_name = mechanical_object_name,
+                    minPressure = minPressure,
+                    maxPressure = maxPressure)
 
     # Add a SurfacePressureConstraint object with a name.
     # the indices are referring to the MechanicalObject's positions.
     pneumatic.addObject('SurfacePressureConstraint',
                         value=initialValue,
-                        valueType=valueType)
+                        valueType=valueType,
+                        name = SPC_node_name)
 
     # This adds a BarycentricMapping. A BarycentricMapping is a key element as it will add a bi-directional link
     # between the cavity's DoFs and the parents' ones so that the pressure applied on the cavity wall will be mapped
